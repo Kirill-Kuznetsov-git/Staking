@@ -3,7 +3,6 @@ import { ethers } from "hardhat";
 import {BigNumber, Signer} from "ethers";
 import { Stacking, Stacking__factory, IUniswapV2Factory, IUniswapV2Router02, IUniswapV2Pair, ERCInterface, ERC20__factory } from "../typechain";
 import { basename } from "path";
-import { IERC20Interface } from "../typechain/IERC20";
 
 
 describe("Stacking", function () {
@@ -36,13 +35,31 @@ describe("Stacking", function () {
   it("Function Stake", async function () {
     await rewardToken.mint(await accounts[0].getAddress(), 500000)
     await rewardToken.approve(router.address, ethers.BigNumber.from(100));
-    console.log(await rewardToken.allowance(await accounts[0].getAddress(), router.address))
     const tokenValue = 50
     const ethValue = 10
-    console.log(await accounts[0].getBalance())
-    console.log(await rewardToken.balanceOf(await accounts[0].getAddress()))
-    console.log(await router.addLiquidityETH(rewardToken.address, ethers.BigNumber.from(tokenValue),
-     ethers.BigNumber.from(tokenValue), ethers.BigNumber.from(ethValue), await accounts[0].getAddress(), 10653047684, {value: ethers.BigNumber.from(ethValue)}))
-    console.log(await contract.stake(await lpToken.balanceOf(await accounts[0].getAddress())))
+    console.log(await lpToken.balanceOf(await accounts[0].getAddress()))
+    await router.addLiquidityETH(rewardToken.address, ethers.BigNumber.from(tokenValue),
+     ethers.BigNumber.from(tokenValue), ethers.BigNumber.from(ethValue), await accounts[0].getAddress(), 10653047684, {value: ethers.BigNumber.from(ethValue)})
+    const oldBalance = await lpToken.balanceOf(await accounts[0].getAddress());
+    await contract.stake(await lpToken.balanceOf(await accounts[0].getAddress()));
+    expect((await lpToken.balanceOf(await accounts[0].getAddress())).isZero).to.eq(true)
   });
+
+  it("Function claim", async function () {
+    console.log(await lpToken.balanceOf(await accounts[0].getAddress()))
+    await contract.stake(await lpToken.balanceOf(await accounts[0].getAddress()));
+    contract.changeTimeFreezing(5)
+    contract.changeProcent(1)
+    const oldBalance = await rewardToken.balanceOf(await accounts[0].getAddress());
+    contract.claim();
+    expect(await rewardToken.balanceOf(await accounts[0].getAddress())).to.gte(oldBalance);
+  })
+
+  it("Function unstake", async function () {
+    await contract.stake(await lpToken.balanceOf(await accounts[0].getAddress()));
+    contract.changeTimeFreezing(1)
+    const oldBalance = await lpToken.balanceOf(await accounts[0].getAddress());
+    contract.unstake();
+    expect(await lpToken.balanceOf(await accounts[0].getAddress())).to.gte(oldBalance);
+  })
 });

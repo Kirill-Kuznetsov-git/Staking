@@ -14,6 +14,11 @@ contract Stacking {
     uint private firstIndexStackElement = 0;
     uint private stacksLength = 0;
 
+    modifier onlyOwner(){
+        require(msg.sender == owner, "not an owner");
+        _;
+    }
+
     struct Stack {
         uint256 startAt;
         uint256 amount;
@@ -47,5 +52,13 @@ contract Stacking {
         claim();
         lpToken.transfer(msg.sender, returnLpTokens[msg.sender]);
         returnLpTokens[msg.sender] = 0;
+    }
+
+    function changeTimeFreezing(uint _timeFreezing) public onlyOwner {
+        timeFreezing = _timeFreezing;
+    }
+
+    function changeProcent(uint _procent) public onlyOwner {
+        procent = _procent;
     }
 }
