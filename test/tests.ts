@@ -39,7 +39,10 @@ describe("Stacking", function () {
     console.log(await rewardToken.allowance(await accounts[0].getAddress(), router.address))
     const tokenValue = 50
     const ethValue = 10
+    console.log(await accounts[0].getBalance())
+    console.log(await rewardToken.balanceOf(await accounts[0].getAddress()))
     console.log(await router.addLiquidityETH(rewardToken.address, ethers.BigNumber.from(tokenValue),
-     ethers.BigNumber.from(tokenValue), ethers.BigNumber.from(ethValue), await accounts[0].getAddress(), 2653047684, {value: ethers.BigNumber.from(ethValue)}))
+     ethers.BigNumber.from(tokenValue), ethers.BigNumber.from(ethValue), await accounts[0].getAddress(), 10653047684, {value: ethers.BigNumber.from(ethValue)}))
+    console.log(await contract.stake(await lpToken.balanceOf(await accounts[0].getAddress())))
   });
 });
